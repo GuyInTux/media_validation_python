@@ -71,13 +71,18 @@ def validate_image(file_path):
 #         print(f"Invalid image file. Error: {str(e)}")
 #         return False
 
-# video_file_path = "output.MOV"
-video_file_path = "output.MOV"
-# image_file_path = "sample_valid_img.webp"
-image_file_path = "sample_valid_img.webp"
+video_file_path = "test_samples/output.MOV"
+image_file_path = "test_samples/sample_valid_img.webp"
 
 if validate_video(file_path=video_file_path):
     print(f"Video file {video_file_path} is valid.")
 
 if validate_image(file_path=image_file_path):
     print(f"Image file {image_file_path} is valid.")
+
+# Test Results:
+# test_samples/output.mov is valid. (moviepy)
+# test_samples/1mb-png-non-pdf.pdf considered valid, despite being manually renamed to a .pdf file. (PIL)
+# test_samples/1500kb.webp is valid. (PIL)
+# test_samples/corrupted_1mb_oriwebp.webp considered invalid. Error: (cannot identify image file 'test_samples/corrupted_1mb_oriwebp.webp') (PIL)
+# test_samples/sample_valid_img.webp is valid. (PIL)
