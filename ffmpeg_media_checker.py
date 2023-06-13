@@ -5,7 +5,7 @@ import ffmpeg
 def validate_file(file_path):
     # Level 1: Check file extension, magic number
     try:
-        probe = ffmpeg.probe(file_path)
+        probe = ffmpeg.ffprobe(file_path)
     except ffmpeg.Error as e:
         print(f"Level 1 validation failed with error: {e.stderr.decode()}")
         return False
