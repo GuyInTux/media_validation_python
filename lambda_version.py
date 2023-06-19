@@ -1,7 +1,3 @@
-# NOTE: This function removes ALL Metadata and Tags of input video files
-# To remove ONLY GPS metadata, please use 'ffmpeg-test' Lambda function attached below:
-# https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions/ffmpeg-test?tab=code
-
 import boto3
 import os
 import subprocess
@@ -12,7 +8,7 @@ s3 = boto3.client("s3")
 def lambda_handler(event, context):
     bucket_name = "s3-dev-g2g-user"
     input_folder = "sample_media"
-    input_file_key = event["input_file_key"]
+    input_file_key = event['input_file_key']
 
     input_file_path = f"/tmp/{input_file_key}"
     input_file_extension = os.path.splitext(input_file_key)[1]
@@ -36,19 +32,10 @@ def lambda_handler(event, context):
     if is_image:
         try:
             # to check if the file can be decoded/ incl. checking magic number internally
-            cmd = [
-                "/opt/ffmpeg",
-                "-v",
-                "error",
-                "-i",
-                input_file_path,
-                "-f",
-                "null",
-                "-",
-            ]
+            cmd = ["/opt/ffmpeg", "-xerror", "-v", "error", "-i", input_file_path, "-f", "null", "-"]
             subprocess.run(cmd, check=True, capture_output=True)
             first_check = True
-            print("Image is valid")
+            print(f"Image {event['input_file_key']} is valid")
         except subprocess.CalledProcessError as e:
             print(f"Invalid image file: {e.stderr.decode().strip()}")
             return False
@@ -57,6 +44,7 @@ def lambda_handler(event, context):
         try:
             cmd = [
                 "/opt/ffmpeg",
+                "-xerror",
                 "-v",
                 "error",
                 "-i",
@@ -67,10 +55,71 @@ def lambda_handler(event, context):
             ]
             subprocess.run(cmd, check=True, capture_output=True)
             first_check = True
-            print("Video is valid")
+            print(f"Video {event['input_file_key']} is valid")
         except subprocess.CalledProcessError as e:
             print(f"Invalid video file: {e.stderr.decode().strip()}")
             return False
+
+# import boto3
+# import os
+# import subprocess
+
+# s3 = boto3.client("s3")
+
+
+# def lambda_handler(event, context):
+#     bucket_name = "s3-dev-g2g-user"
+#     input_folder = "sample_media"
+#     input_file_key = event['input_file_key']
+
+#     input_file_path = f"/tmp/{input_file_key}"
+#     input_file_extension = os.path.splitext(input_file_key)[1]
+#     s3.download_file(bucket_name, f"{input_folder}/{input_file_key}", input_file_path)
+
+#     accepted_formats = [".mp4", ".mov", ".avi", ".3gp", ".wmv", ".flv"]
+#     accepted_image_formats = [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+
+#     is_image = False
+#     is_video = False
+#     if input_file_extension.lower() in accepted_image_formats:
+#         is_image = True
+#     elif input_file_extension.lower() in accepted_formats:
+#         is_video = True
+#     else:
+#         print(
+#             f"Input file format not supported. Please upload a video file with one of the following extensions: {', '.join(accepted_formats)}"
+#         )
+#         return  # abort function
+
+#     if is_image:
+#         try:
+#             # to check if the file can be decoded/ incl. checking magic number internally
+#             cmd = ["/opt/ffmpeg", "-v", "error", "-i", input_file_path, "-f", "null", "-"]
+#             subprocess.run(cmd, check=True, capture_output=True)
+#             first_check = True
+#             print("Image is valid")
+#         except subprocess.CalledProcessError as e:
+#             print(f"Invalid image file: {e.stderr.decode().strip()}")
+#             return False
+
+#     if is_video:
+#         try:
+#             cmd = [
+#                 "/opt/ffmpeg",
+#                 "-v",
+#                 "error",
+#                 "-i",
+#                 input_file_path,
+#                 "-f",
+#                 "null",
+#                 "-",
+#             ]
+#             subprocess.run(cmd, check=True, capture_output=True)
+#             first_check = True
+#             print("Video is valid")
+#         except subprocess.CalledProcessError as e:
+#             print(f"Invalid video file: {e.stderr.decode().strip()}")
+#             return False
 
 
 # # NOTE: This function removes ALL Metadata and Tags of input video files
